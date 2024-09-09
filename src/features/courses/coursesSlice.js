@@ -5,14 +5,16 @@ import axios from "axios";
 export const fetchCourses = createAsyncThunk(
   "courses/fetchCourses",
   async () => {
-    const response = await axios.get("http://localhost:4000/api/courses");
+    const response = await axios.get(
+      "https://alemonoservers.vercel.app/api/courses"
+    );
     return response.data;
   }
 );
 
 export const likeCourse = createAsyncThunk("courses/likeCourse", async (id) => {
   const response = await axios.put(
-    `http://localhost:4000/api/courses/${id}/like`
+    `https://alemonoservers.vercel.app/api/courses/${id}/like`
   );
   return response.data;
 });
