@@ -1,3 +1,4 @@
+// src/features/courses/coursesSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
@@ -20,10 +21,28 @@ const coursesSlice = createSlice({
   name: "courses",
   initialState: {
     courses: [],
+    completedCourses:
+      JSON.parse(localStorage.getItem("completedCourses")) || [],
     loading: false,
     error: null,
   },
-  reducers: {},
+  reducers: {
+    markCourseAsCompleted: (state, action) => {
+      const courseId = action.payload;
+      if (!state.completedCourses.includes(courseId)) {
+        state.completedCourses.push(courseId);
+        localStorage.setItem(
+          "completedCourses",
+          JSON.stringify(state.completedCourses)
+        );
+      }
+    },
+    loadCompletedCourses: (state) => {
+      state.completedCourses =
+        JSON.parse(localStorage.getItem("completedCourses")) || [];
+    },
+  },
+
   extraReducers: (builder) => {
     builder
       .addCase(fetchCourses.pending, (state) => {
@@ -42,9 +61,13 @@ const coursesSlice = createSlice({
         const index = state.courses.findIndex(
           (course) => course._id === action.payload._id
         );
-        state.courses[index] = action.payload;
+        if (index !== -1) {
+          state.courses[index] = action.payload;
+        }
       });
   },
 });
 
+export const { markCourseAsCompleted, loadCompletedCourses } =
+  coursesSlice.actions;
 export default coursesSlice.reducer;

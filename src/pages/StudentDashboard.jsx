@@ -1,14 +1,32 @@
-// src/pages/StudentDashboard.js
-
-import React from "react";
-import { useSelector } from "react-redux";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchCourses,
+  markCourseAsCompleted,
+  loadCompletedCourses,
+} from "../features/courses/coursesSlice";
 
 function StudentDashboard() {
-  const courses = useSelector((state) => state.courses.courses);
+  const dispatch = useDispatch();
+  const { courses, completedCourses, loading, error } = useSelector(
+    (state) => state.courses
+  );
+
+  useEffect(() => {
+    dispatch(loadCompletedCourses());
+    dispatch(fetchCourses());
+  }, [dispatch]);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
+
+  const handleComplete = (courseId) => {
+    dispatch(markCourseAsCompleted(courseId));
+  };
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Student Dashboard</h1>
+      <h1 className="text-2xl font-bold mb-4">My Courses</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {courses.map((course) => (
           <div
@@ -22,7 +40,6 @@ function StudentDashboard() {
             />
             <h2 className="text-xl font-semibold">{course.name}</h2>
             <p className="text-gray-600">Instructor: {course.instructor}</p>
-            <p className="text-gray-600">Due Date: {course.dueDate}</p>
             <div className="relative pt-1">
               <div className="overflow-hidden h-2 text-xs flex rounded bg-green-200">
                 <div
@@ -31,8 +48,21 @@ function StudentDashboard() {
                 ></div>
               </div>
             </div>
-            <button className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-              Mark as Completed
+            <button
+              className={`mt-2 px-4 py-2 rounded-lg ${
+                completedCourses.includes(course._id)
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-500 text-white hover:bg-blue-600"
+              }`}
+              onClick={() =>
+                !completedCourses.includes(course._id) &&
+                handleComplete(course._id)
+              }
+              disabled={completedCourses.includes(course._id)}
+            >
+              {completedCourses.includes(course._id)
+                ? "Completed"
+                : "Mark as Completed"}
             </button>
           </div>
         ))}
